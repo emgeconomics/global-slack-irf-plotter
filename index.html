@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Workhorse Two-Country New Keynesian Model: IRF Plotter</title>
-  <link rel="stylesheet" href="styles.css?v=20260522-legend-clean">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260522-site-blend">
 </head>
 <body>
   <main>
@@ -14,13 +17,15 @@
         <h1>Workhorse Two-Country New Keynesian Model</h1>
         <p class="subtitle">Impulse Response Functions (IRFs) Plotter</p>
         <p class="lead">
-          Explore how productivity and monetary-policy shocks propagate in the workhorse two-country
-          New Keynesian model when structural parameters, shock processes, and monetary-policy rules
-          are modified. The tool is designed as a companion to
+          <strong>Digging deeper on shock transmission and international linkages:</strong> this
+          interactive plotter explores how productivity and monetary-policy shocks propagate in a
+          workhorse two-country New Keynesian model when structural parameters, shock processes, and
+          monetary-policy rules are modified. It is designed as a companion to
           <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a>
-          by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne, making it possible to compare a benchmark
-          parameterization against an alternative specification and to explore endogenous and exogenous
-          cross-country spillovers, including the role of monetary policy.
+          by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne. The black lines report a benchmark
+          parameterization, while the blue lines report an alternative specification chosen by the
+          user, making it possible to trace endogenous and exogenous cross-country spillovers as well
+          as the role of monetary policy.
         </p>
       </div>
     </section>
@@ -93,10 +98,10 @@
     <section class="notes">
       <h2>Implementation Notes</h2>
       <p>
-        This browser tool accompanies
+        This browser-based plotter accompanies
         <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a>
         by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne. The link is a placeholder for the
-        paper version to be posted publicly. The plotter solves a workhorse two-country New Keynesian
+        public version of the paper. The plotter solves a workhorse two-country New Keynesian
         model in which Home and Foreign economies are linked through trade, relative prices, monetary
         policy, and cross-country shock transmission. The pricing assumption is producer-currency
         pricing, abbreviated PCP, meaning that exporters set prices in their own currency. In this
@@ -147,6 +152,6 @@
   <noscript>
     <p class="script-warning">This tool requires JavaScript to solve the model and plot impulse responses.</p>
   </noscript>
-  <script type="module" src="app.js?v=20260522-legend-clean"></script>
+  <script type="module" src="app.js?v=20260522-site-blend"></script>
 </body>
 </html>
