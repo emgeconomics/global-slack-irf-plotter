@@ -9,40 +9,144 @@
 <body>
   <main>
     <section class="intro">
-      <p class="eyebrow">Global Slack Hypothesis</p>
-      <h1>Workhorse Two-Country New Keynesian Model</h1>
-      <p class="subtitle">Impulse Response Functions (IRFs) Plotter</p>
-      <p class="lead">Explore how productivity and monetary-policy shocks propagate in the workhorse two-country New Keynesian model when structural parameters, shock processes, and monetary-policy rules are modified. The tool is designed as a companion to <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a> by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne, making it possible to compare a benchmark parameterization against an alternative specification and to explore endogenous and exogenous cross-country spillovers, including the role of monetary policy.</p>
+      <div>
+        <p class="eyebrow">Global Slack Hypothesis</p>
+        <h1>Workhorse Two-Country New Keynesian Model</h1>
+        <p class="subtitle">Impulse Response Functions (IRFs) Plotter</p>
+        <p class="lead">
+          Explore how productivity and monetary-policy shocks propagate in the workhorse two-country
+          New Keynesian model when structural parameters, shock processes, and monetary-policy rules
+          are modified. The tool is designed as a companion to
+          <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a>
+          by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne, making it possible to compare a benchmark
+          parameterization against an alternative specification and to explore endogenous and exogenous
+          cross-country spillovers, including the role of monetary policy.
+        </p>
+      </div>
     </section>
+
     <section class="tool-shell">
       <section class="controls">
         <div class="control-card">
           <h2>Shock Scenario</h2>
-          <label>Shock<select id="shockType"><option value="eps_a">Home productivity</option><option value="eps_astar">Foreign productivity</option><option value="eps_m">Home monetary policy</option><option value="eps_mstar">Foreign monetary policy</option></select></label>
-          <div class="two-col"><label>Sign<select id="shockSign"><option value="positive">Positive</option><option value="negative">Negative</option></select></label><label>Size<select id="shockScale"><option value="1">1 std. dev.</option><option value="2">2 std. dev.</option><option value="3">3 std. dev.</option></select></label></div>
-          <label>Horizon<input id="horizon" type="number" min="12" max="80" step="1" value="40"></label>
+          <label>
+            Shock
+            <select id="shockType">
+              <option value="eps_a">Home productivity</option>
+              <option value="eps_astar">Foreign productivity</option>
+              <option value="eps_m">Home monetary policy</option>
+              <option value="eps_mstar">Foreign monetary policy</option>
+            </select>
+          </label>
+          <div class="two-col">
+            <label>
+              Sign
+              <select id="shockSign">
+                <option value="positive">Positive</option>
+                <option value="negative">Negative</option>
+              </select>
+            </label>
+            <label>
+              Size
+              <select id="shockScale">
+                <option value="1">1 std. dev.</option>
+                <option value="2">2 std. dev.</option>
+                <option value="3">3 std. dev.</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Horizon
+            <input id="horizon" type="number" min="12" max="80" step="1" value="40">
+          </label>
         </div>
+
         <div id="parameterControls"></div>
-        <div class="parameter-toolbar"><p>Edit benchmark and alternative values above. The benchmark response is black; the alternative response is blue.</p><div class="button-row"><button id="resetBoth" type="button">Reset both to paper benchmark</button><button id="copyBenchmark" type="button">Copy benchmark to alternative</button></div></div>
-        <div class="action-bar"><button id="plotButton" class="primary-button" type="button">Plot responses</button><button id="downloadCsv" type="button">Download IRF data</button><span>Chart panels also include individual SVG downloads.</span></div>
+
+        <div class="parameter-toolbar">
+          <p>Edit benchmark and alternative values above. The benchmark response is black; the alternative response is blue.</p>
+          <div class="button-row">
+            <button id="resetBoth" type="button">Reset both to paper benchmark</button>
+            <button id="copyBenchmark" type="button">Copy benchmark to alternative</button>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button id="plotButton" class="primary-button" type="button">Plot responses</button>
+          <button id="downloadCsv" type="button">Download IRF data</button>
+          <span>Chart panels also include individual SVG downloads.</span>
+        </div>
       </section>
+
       <section class="results">
         <div id="status" class="status" role="status">Loading model controls...</div>
-        <div class="legend-strip"><span><i class="line-key benchmark"></i> Benchmark</span><span><i class="line-key alternative"></i> Alternative</span><span><i class="line-key companion"></i> Real exchange rate</span><span><i class="line-key productivity"></i> Productivity shock</span><span><i class="line-key monetary"></i> Monetary shock</span></div>
+        <div class="legend-strip">
+          <span><i class="line-key benchmark"></i> Benchmark</span>
+          <span><i class="line-key alternative"></i> Alternative</span>
+          <span><i class="line-key productivity"></i> Productivity shock</span>
+          <span><i class="line-key monetary"></i> Monetary shock</span>
+        </div>
         <div id="charts" class="chart-stack"></div>
       </section>
     </section>
+
     <section class="notes">
       <h2>Implementation Notes</h2>
-      <p>This browser tool accompanies <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a> by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne. The link is a placeholder for the paper version to be posted publicly. The plotter solves a workhorse two-country New Keynesian model in which Home and Foreign economies are linked through trade, relative prices, monetary policy, and cross-country shock transmission. The pricing assumption is producer-currency pricing, abbreviated PCP, meaning that exporters set prices in their own currency. In this setting, nominal exchange-rate movements pass through fully to import prices.</p>
-      <p>The foreign import-share parameter is pinned down by zero steady-state trade balance: <span class="math">&xi;<sup>*</sup> = n(1 - &xi;)/(1 - n)</span>. The interface therefore lets users choose <span class="math">n</span> and <span class="math">&xi;</span>, but not <span class="math">&xi;<sup>*</sup></span>. The controls impose the economically natural home-bias restriction <span class="math">&xi; &ge; n</span>.</p>
-      <p>Shock magnitudes are expressed in innovation standard deviations. In a Gaussian benchmark, one, two, and three standard deviations correspond roughly to 68, 95, and 99.7 percent bands. The impact response is plotted as quarter 1, and the default horizon reports 40 quarters. Innovation correlations are retained as displayed parameters for consistency with the stochastic model, but a deterministic one-shock impulse response is driven by the selected innovation only.</p>
-      <p>The model combines aggregate demand equations, Phillips curves for inflation, monetary-policy rules, natural-rate and potential-output relationships, and stochastic processes for productivity and monetary-policy disturbances in both economies. Home and Foreign employment are computed from the log-linear production relationships, so <span class="math">l = y - a</span> and <span class="math">l<sup>*</sup> = y<sup>*</sup> - a<sup>*</sup></span>.</p>
-      <p>The policy-rate and natural-rate responses are plotted in separate panels. In the relative-price panels, solid lines report the terms of trade and dashed lines report the real exchange rate. The Wicksellian monetary-policy option means that each policy rule tracks its own economy's natural rate; the standard Taylor-rule option responds to inflation and slack without that natural-rate tracking term.</p>
-      <p>The plotted terms of trade, real exchange rates, and trade balances are accounting relationships computed after solving the dynamic system. In the producer-currency-pricing environment, the Home terms of trade move with the productivity-driven natural relative price and with the gap between Home and Foreign slack. The Foreign terms of trade move one-for-one in the opposite direction. The real exchange rates are tied to those terms-of-trade movements through the difference in Home-good expenditure shares across the two consumption baskets. Because the model is normalized around zero steady-state trade balance, the trade-balance series report deviations from that steady-state benchmark: a positive Home value corresponds to an equal Foreign deficit, and vice versa.</p>
+      <p>
+        This browser tool accompanies
+        <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a>
+        by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne. The link is a placeholder for the
+        paper version to be posted publicly. The plotter solves a workhorse two-country New Keynesian
+        model in which Home and Foreign economies are linked through trade, relative prices, monetary
+        policy, and cross-country shock transmission. The pricing assumption is producer-currency
+        pricing, abbreviated PCP, meaning that exporters set prices in their own currency. In this
+        setting, nominal exchange-rate movements pass through fully to import prices.
+      </p>
+      <p>
+        The foreign import-share parameter is pinned down by zero steady-state trade balance:
+        <span class="math">&xi;<sup>*</sup> = n(1 - &xi;)/(1 - n)</span>. The interface therefore lets
+        users choose <span class="math">n</span> and <span class="math">&xi;</span>, but not
+        <span class="math">&xi;<sup>*</sup></span>. The controls impose the economically natural
+        home-bias restriction <span class="math">&xi; &ge; n</span>.
+      </p>
+      <p>
+        Shock magnitudes are expressed in innovation standard deviations. In a Gaussian benchmark, one,
+        two, and three standard deviations correspond roughly to 68, 95, and 99.7 percent bands. The
+        impact response is plotted as quarter 1, and the default horizon reports 40 quarters.
+        Innovation correlations are retained as displayed parameters for consistency with the stochastic
+        model, but a deterministic one-shock impulse response is driven by the selected innovation only.
+      </p>
+      <p>
+        The model combines aggregate demand equations, Phillips curves for inflation, monetary-policy
+        rules, natural-rate and potential-output relationships, and stochastic processes for productivity
+        and monetary-policy disturbances in both economies. Home and Foreign employment are computed
+        from the log-linear production relationships, so <span class="math">l = y - a</span> and
+        <span class="math">l<sup>*</sup> = y<sup>*</sup> - a<sup>*</sup></span>.
+      </p>
+      <p>
+        The policy-rate and natural-rate responses are plotted in separate panels. In the relative-price
+        panels, solid lines report the terms of trade and dashed lines report the real exchange rate.
+        The Wicksellian monetary-policy option means that each policy rule tracks its own economy's
+        natural rate; the standard Taylor-rule option responds to inflation and slack without that
+        natural-rate tracking term.
+      </p>
+      <p>
+        The plotted terms of trade, real exchange rates, and trade balances are accounting relationships
+        computed after solving the dynamic system. In the producer-currency-pricing environment, the
+        Home terms of trade move with the productivity-driven natural relative price and with the gap
+        between Home and Foreign slack. The Foreign terms of trade move one-for-one in the opposite
+        direction. The real exchange rates are tied to those terms-of-trade movements through the
+        difference in Home-good expenditure shares across the two consumption baskets. Because the
+        model is normalized around zero steady-state trade balance, the trade-balance series report
+        deviations from that steady-state benchmark: a positive Home value corresponds to an equal
+        Foreign deficit, and vice versa.
+      </p>
     </section>
   </main>
-  <noscript><p class="script-warning">This tool requires JavaScript to solve the model and plot impulse responses.</p></noscript>
+
+  <noscript>
+    <p class="script-warning">This tool requires JavaScript to solve the model and plot impulse responses.</p>
+  </noscript>
   <script type="module" src="app.js"></script>
 </body>
 </html>
