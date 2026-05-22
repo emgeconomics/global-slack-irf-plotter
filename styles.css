@@ -396,11 +396,6 @@ button:hover {
   background: var(--alt);
 }
 
-.line-key.companion {
-  border-top: 3px dashed #111;
-  background: transparent;
-}
-
 .line-key.productivity {
   background: var(--prod);
 }
