@@ -15,6 +15,7 @@
   --prod-alt: #c95d50;
   --monetary: #7a3f18;
   --monetary-alt: #c46d2d;
+  --shock: #8b2f2a;
   --warning: #b06000;
   --error: #b3261e;
 }
@@ -418,12 +419,8 @@ button:hover {
   background: var(--alt);
 }
 
-.line-key.productivity {
-  background: var(--prod);
-}
-
-.line-key.monetary {
-  background: var(--monetary);
+.line-key.shock {
+  background: var(--shock);
 }
 
 .chart-stack {
@@ -527,19 +524,19 @@ button:hover {
 }
 
 .shock-line.productivity.benchmark {
-  stroke: var(--prod);
+  stroke: var(--shock);
 }
 
 .shock-line.productivity.alternative {
-  stroke: var(--prod-alt);
+  stroke: var(--shock);
 }
 
 .shock-line.monetary.benchmark {
-  stroke: var(--monetary);
+  stroke: var(--shock);
 }
 
 .shock-line.monetary.alternative {
-  stroke: var(--monetary-alt);
+  stroke: var(--shock);
 }
 
 .zero-line {
@@ -563,6 +560,23 @@ button:hover {
   max-width: 780px;
   color: var(--error);
   font-weight: 700;
+}
+
+.solution-error-panel {
+  border: 1px solid rgba(179, 38, 30, 0.35);
+  border-radius: 8px;
+  background: #fff7f7;
+  color: var(--error);
+  padding: 20px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.solution-error-panel p {
+  margin: 4px 0;
 }
 
 @media (max-width: 980px) {
