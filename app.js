@@ -1,18 +1,498 @@
-import{PAPER_PARAMS,PARAM_GROUPS,SERIES,cloneParams,getXistar,validateParams,solveModel}from"./model.js";
-const $=id=>document.getElementById(id),dom={shockType:$("shockType"),shockSign:$("shockSign"),shockScale:$("shockScale"),horizon:$("horizon"),plotButton:$("plotButton"),resetBoth:$("resetBoth"),copyBenchmark:$("copyBenchmark"),parameterControls:$("parameterControls"),status:$("status"),charts:$("charts"),downloadCsv:$("downloadCsv")};
-const HOME_BIAS_MARGIN=.0001,CHART_GROUPS=[["home","Home Economy"],["foreign","Foreign Economy"],["shock","Shock Processes"]],CHART_LAYOUTS={home:[["pi","employment"],["y","growth"],["i","in"],["tb","tot"]],foreign:[["pistar","employmentStar"],["ystar","growthStar"],["istar","instar"],["tbstar","totstar"]],shock:[["a","astar"],["m","mstar"]]};
-let benchmark=cloneParams(PAPER_PARAMS),alternative=cloneParams(PAPER_PARAMS),latest=null;
-function fmt(v,d=3){if(!Number.isFinite(v))return"n/a";return Number(v.toFixed(d)).toLocaleString(undefined,{maximumFractionDigits:d})}function shock(){return{type:dom.shockType.value,sign:dom.shockSign.value,scale:Number(dom.shockScale.value)}}function horizon(){const v=Math.round(Number(dom.horizon.value));return Math.min(80,Math.max(12,Number.isFinite(v)?v:40))}function params(side){return side==="benchmark"?benchmark:alternative}function setParams(side,v){side==="benchmark"?benchmark=v:alternative=v}function minXi(p){return Math.min(.999,Math.max(.01,(Number.isFinite(p.n)?p.n:.01)+HOME_BIAS_MARGIN))}function enforce(p){const m=minXi(p);if(Number.isFinite(p.xi)&&p.xi<m)p.xi=m}function dirty(){dom.status.className="status warning";dom.status.textContent="Settings changed. Click Plot responses to update the charts."}
-function labelHtml(k,f){return({n:'Home country size, <span class="math-param">n</span>',foreignSize:'Foreign country size, <span class="math-param">1 - n</span>',xi:'Home-goods share in Home CPI, <span class="math-param">&xi;</span>',xistar:'Home-goods share in Foreign CPI, <span class="math-param">&xi;<sup>*</sup></span>',beta:'Discount factor, <span class="math-param">&beta;</span>',gam:'Risk aversion, <span class="math-param">&gamma;</span>',vphi:'Inverse Frisch elasticity, <span class="math-param">&varphi;</span>',sig:'Trade elasticity, <span class="math-param">&sigma;</span>',alpha:'Calvo parameter, <span class="math-param">&alpha;</span>',rho_i:'Home interest-rate smoothing, <span class="math-param">&rho;<sub>i</sub></span>',rho_istar:'Foreign interest-rate smoothing, <span class="math-param">&rho;<sub>i</sub><sup>*</sup></span>',phi_pi:'Home inflation response, <span class="math-param">&phi;<sub>&pi;</sub></span>',phi_pistar:'Foreign inflation response, <span class="math-param">&phi;<sub>&pi;</sub><sup>*</sup></span>',phi_x:'Home slack response, <span class="math-param">&phi;<sub>x</sub></span>',phi_xstar:'Foreign slack response, <span class="math-param">&phi;<sub>x</sub><sup>*</sup></span>',iota:'Natural-rate tracking, <span class="math-param">&iota;</span>',deltaa:'Home productivity persistence, <span class="math-param">&delta;<sub>a</sub></span>',deltaastar:'Foreign productivity persistence, <span class="math-param">&delta;<sub>a</sub><sup>*</sup></span>',stda:'Home productivity std. dev., <span class="math-param">&sigma;<sub>a</sub></span>',stdastar:'Foreign productivity std. dev., <span class="math-param">&sigma;<sub>a</sub><sup>*</sup></span>',corraastar:'Productivity innovation correlation, <span class="math-param">&rho;<sub>aa*</sub></span>',deltam:'Home monetary persistence, <span class="math-param">&delta;<sub>m</sub></span>',deltamstar:'Foreign monetary persistence, <span class="math-param">&delta;<sub>m</sub><sup>*</sup></span>',stdm:'Home monetary std. dev., <span class="math-param">&sigma;<sub>m</sub></span>',stdmstar:'Foreign monetary std. dev., <span class="math-param">&sigma;<sub>m</sub><sup>*</sup></span>',corrmmstar:'Monetary innovation correlation, <span class="math-param">&rho;<sub>mm*</sub></span>'})[k]||f}
-function plain(h){const d=document.createElement("div");d.innerHTML=h;return d.textContent||d.innerText||""}function sync(){dom.parameterControls.querySelectorAll("[data-param][data-side]").forEach(i=>{const p=params(i.dataset.side),k=i.dataset.param;if(k==="xi")i.min=minXi(p);if(k in p&&Number.isFinite(p[k]))i.value=String(p[k])})}function update(side,k,v){const p=params(side);p[k]=Number(v);enforce(p);setParams(side,p);sync();renderImplied();dirty()}
-function editor(k,label,min,max,step,side){const p=params(side),aria=plain(labelHtml(k,label));if(k==="iota")return`<select data-side="${side}" data-param="${k}" aria-label="${aria}, ${side}"><option value="0"${Number(p[k])===0?" selected":""}>Standard Taylor rule</option><option value="1"${Number(p[k])===1?" selected":""}>Wicksellian rule</option></select>`;const mn=k==="xi"?minXi(p):min,val=Number.isFinite(p[k])?p[k]:min;return`<div class="param-editor"><input type="range" min="${mn}" max="${max}" step="${step}" value="${val}" data-side="${side}" data-param="${k}" aria-label="${aria}, ${side} slider"><input type="number" min="${mn}" max="${max}" step="${step}" value="${val}" data-side="${side}" data-param="${k}" aria-label="${aria}, ${side} exact value"></div>`}
-function implied(k,side){const p=params(side);if(k==="foreignSize")return 1-p.n;if(k==="xistar")return getXistar(p);return NaN}function ro(k,side){return`<div class="readonly-value" data-implied="${k}" data-side="${side}">${fmt(implied(k,side),6)}</div>`}function rows(g){if(g.title!=="Structural parameters")return g.params;const out=[];g.params.forEach(r=>{out.push(r);if(r[0]==="n")out.push(["foreignSize","",null,null,null,true]);if(r[0]==="xi")out.push(["xistar","",null,null,null,true])});return out}
-function renderControls(){dom.parameterControls.innerHTML=PARAM_GROUPS.map(g=>`<details class="parameter-group" open><summary>${g.title}</summary><div class="group-body"><p class="small">${g.help}</p><div class="param-grid header-row"><span>Parameter</span><span>Benchmark</span><span>Alternative</span></div>${rows(g).map(([k,l,min,max,step,readOnly])=>`<div class="param-grid"><label>${labelHtml(k,l)}</label>${readOnly?ro(k,"benchmark"):editor(k,l,min,max,step,"benchmark")}${readOnly?ro(k,"alternative"):editor(k,l,min,max,step,"alternative")}</div>`).join("")}</div></details>`).join("");dom.parameterControls.querySelectorAll("[data-param][data-side]").forEach(i=>i.addEventListener("input",e=>update(e.currentTarget.dataset.side,e.currentTarget.dataset.param,e.currentTarget.value)))}
-function renderImplied(){enforce(benchmark);enforce(alternative);dom.parameterControls.querySelectorAll("[data-implied][data-side]").forEach(e=>e.textContent=fmt(implied(e.dataset.implied,e.dataset.side),6))}function status(b,a){const w=[...(b.warnings||[]).map(t=>`Benchmark: ${t}`),...(a.warnings||[]).map(t=>`Alternative: ${t}`)];dom.status.className="status";if(w.length){dom.status.classList.add("warning");dom.status.textContent=w.join(" ")}else dom.status.textContent="Impulse responses plotted. The impact of the selected shock is recorded in quarter 1."}
-function ticks(min,max,c=5){if(Math.abs(max-min)<1e-10){const b=Math.max(1e-4,Math.abs(max)*.2);min-=b;max+=b}return Array.from({length:c},(_,i)=>min+i*(max-min)/(c-1))}function qt(H){return Array.from(new Set([1,Math.round(H/4),Math.round(H/2),Math.round(3*H/4),H].map(t=>Math.min(H,Math.max(1,t)))))}function val(row,s,layer="primary"){if(layer==="secondary"&&s.secondaryVariable)return row[s.secondaryVariable];if(s.id==="growth")return row.growth;if(s.id==="growthStar")return row.growthStar;return row[s.variable]}function path(rows,s,sx,sy,layer="primary"){return rows.map((r,i)=>`${i?"L":"M"}${sx(r.period+1).toFixed(2)},${sy(val(r,s,layer)).toFixed(2)}`).join(" ")}function esc(t){return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}function cls(s,side,layer="primary"){const lc=layer==="secondary"?" secondary":"";if(s.group!=="shock")return`chart-line ${side}${lc}`;return`chart-line shock-line ${s.shockKind==="productivity"?"productivity":"monetary"} ${side}`}
-function chart(s){const W=760,H=340,m={top:30,right:22,bottom:58,left:70},pw=W-m.left-m.right,ph=H-m.top-m.bottom,rb=latest.benchmark.rows,ra=latest.alternative.rows,all=[...rb,...ra].flatMap(r=>s.secondaryVariable?[val(r,s),val(r,s,"secondary")]:[val(r,s)]).filter(Number.isFinite);let min=Math.min(...all,0),max=Math.max(...all,0),pad=Math.max(1e-5,(max-min)*.08);min-=pad;max+=pad;const sx=q=>m.left+(q-1)/Math.max(1,rb.length-1)*pw,sy=y=>m.top+(1-(y-min)/(max-min))*ph,yt=ticks(min,max),xt=qt(rb.length),zero=sy(0);return`<svg class="chart" data-chart-id="${s.id}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.label)} impulse response"><text class="axis-unit" x="${m.left-46}" y="${m.top+ph/2}" text-anchor="middle" transform="rotate(-90 ${m.left-46} ${m.top+ph/2})">%</text>${yt.map(t=>`<text class="axis-label" x="${m.left-8}" y="${(sy(t)+4).toFixed(2)}" text-anchor="end">${esc(fmt(t,2))}</text>`).join("")}<line class="zero-line" x1="${m.left}" x2="${W-m.right}" y1="${zero.toFixed(2)}" y2="${zero.toFixed(2)}"></line><line class="axis" x1="${m.left}" x2="${m.left}" y1="${m.top}" y2="${H-m.bottom}"></line><line class="axis" x1="${m.left}" x2="${W-m.right}" y1="${H-m.bottom}" y2="${H-m.bottom}"></line>${xt.map(t=>`<text class="axis-label" x="${sx(t).toFixed(2)}" y="${H-28}" text-anchor="middle">${t}</text>`).join("")}<text class="axis-label" x="${m.left+pw/2}" y="${H-7}" text-anchor="middle">quarters</text>${s.secondaryVariable?`<path class="${cls(s,"alternative","secondary")}" d="${path(ra,s,sx,sy,"secondary")}"></path>`:""}<path class="${cls(s,"alternative")}" d="${path(ra,s,sx,sy)}"></path>${s.secondaryVariable?`<path class="${cls(s,"benchmark","secondary")}" d="${path(rb,s,sx,sy,"secondary")}"></path>`:""}<path class="${cls(s,"benchmark")}" d="${path(rb,s,sx,sy)}"></path></svg>`}
-function card(s){return`<article class="chart-card"><div class="chart-head"><div><h3>${s.label}</h3><p>${s.unit}${s.note?` | ${s.note}`:""}</p></div><button class="svg-button" type="button" data-download-svg="${s.id}">SVG</button></div>${chart(s)}</article>`}function renderCharts(){dom.charts.innerHTML=CHART_GROUPS.map(([gid,gl])=>{const gs=SERIES.filter(s=>s.group===gid),by=Object.fromEntries(gs.map(s=>[s.id,s])),rows=CHART_LAYOUTS[gid]||[gs.map(s=>s.id)];return`<section class="chart-section ${gid}"><h2>${gl}</h2><div class="chart-grid">${rows.map(r=>`<div class="chart-row">${r.map(id=>card(by[id])).join("")}</div>`).join("")}</div></section>`}).join("");dom.charts.querySelectorAll("[data-download-svg]").forEach(b=>b.addEventListener("click",()=>downloadChart(b.dataset.downloadSvg)))}
-function blob(name,content,type){const b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}function csvEscape(v){if(v==null)return"";const t=String(v);return/[",\n]/.test(t)?`"${t.replaceAll('"','""')}"`:t}function buildCsv(){if(!latest)return"";const head=["quarter"];SERIES.forEach(s=>{head.push(`benchmark_${s.id}`,`alternative_${s.id}`);if(s.secondaryVariable)head.push(`benchmark_${s.secondaryVariable}`,`alternative_${s.secondaryVariable}`)});const lines=[head.map(csvEscape).join(",")];latest.benchmark.rows.forEach((rb,i)=>{const ra=latest.alternative.rows[i],line=[rb.period+1];SERIES.forEach(s=>{line.push(val(rb,s),val(ra,s));if(s.secondaryVariable)line.push(val(rb,s,"secondary"),val(ra,s,"secondary"))});lines.push(line.map(csvEscape).join(","))});return lines.join("\n")}function downloadChart(id){const svg=dom.charts.querySelector(`svg[data-chart-id="${id}"]`);if(!svg)return;const c=svg.cloneNode(true);c.setAttribute("xmlns","http://www.w3.org/2000/svg");c.insertAdjacentHTML("afterbegin",`<style>.axis{stroke:#111;stroke-width:2}.axis-label,.axis-unit{fill:#111;font:700 15px Arial,sans-serif}.axis-unit{font-size:16px}.chart-line.benchmark{fill:none;stroke:#111;stroke-width:3.2}.chart-line.alternative{fill:none;stroke:#1f6fb2;stroke-width:3.2}.chart-line.secondary{stroke-dasharray:8 6}.shock-line.productivity.benchmark{stroke:#8b2f2a}.shock-line.productivity.alternative{stroke:#c95d50}.shock-line.monetary.benchmark{stroke:#7a3f18}.shock-line.monetary.alternative{stroke:#c46d2d}.zero-line{stroke:#555;stroke-width:1.5;stroke-dasharray:3 3}</style>`);blob(`${id}_irf.svg`,new XMLSerializer().serializeToString(c),"image/svg+xml")}
-function run(){try{const H=horizon();dom.horizon.value=String(H);enforce(benchmark);enforce(alternative);sync();renderImplied();const b=validateParams(benchmark),a=validateParams(alternative);if(!b.ok)throw new Error(`Benchmark: ${b.messages.join(" ")}`);if(!a.ok)throw new Error(`Alternative: ${a.messages.join(" ")}`);const sh=shock();latest={benchmark:solveModel(benchmark,sh,H),alternative:solveModel(alternative,sh,H)};status(b,a);renderCharts()}catch(e){dom.status.className="status error";dom.status.textContent=e.message}}
-function wire(){[dom.shockType,dom.shockSign,dom.shockScale,dom.horizon].forEach(i=>i.addEventListener("input",dirty));dom.plotButton.addEventListener("click",run);dom.resetBoth.addEventListener("click",()=>{benchmark=cloneParams(PAPER_PARAMS);alternative=cloneParams(PAPER_PARAMS);renderControls();renderImplied();dirty()});dom.copyBenchmark.addEventListener("click",()=>{alternative=cloneParams(benchmark);renderControls();renderImplied();dirty()});dom.downloadCsv.addEventListener("click",()=>blob("global_slack_irfs.csv",buildCsv(),"text/csv"))}
-renderControls();renderImplied();wire();run();
+import {
+  PAPER_PARAMS,
+  PARAM_GROUPS,
+  SERIES,
+  cloneParams,
+  getXistar,
+  validateParams,
+  solveModel
+} from "./model.js";
+
+const dom = {
+  shockType: document.getElementById("shockType"),
+  shockSign: document.getElementById("shockSign"),
+  shockScale: document.getElementById("shockScale"),
+  horizon: document.getElementById("horizon"),
+  plotButton: document.getElementById("plotButton"),
+  resetBoth: document.getElementById("resetBoth"),
+  copyBenchmark: document.getElementById("copyBenchmark"),
+  parameterControls: document.getElementById("parameterControls"),
+  status: document.getElementById("status"),
+  charts: document.getElementById("charts"),
+  downloadCsv: document.getElementById("downloadCsv")
+};
+
+const HOME_BIAS_MARGIN = 0.0001;
+const CHART_GROUPS = [
+  ["home", "Home Economy"],
+  ["foreign", "Foreign Economy"],
+  ["shock", "Shock Processes"]
+];
+const CHART_LAYOUTS = {
+  home: [["pi", "employment"], ["y", "growth"], ["i", "in"], ["tb", "tot"]],
+  foreign: [["pistar", "employmentStar"], ["ystar", "growthStar"], ["istar", "instar"], ["tbstar", "totstar"]],
+  shock: [["a", "astar"], ["m", "mstar"]]
+};
+
+let benchmark = cloneParams(PAPER_PARAMS);
+let alternative = cloneParams(PAPER_PARAMS);
+let latest = null;
+
+function formatNumber(value, digits = 3) {
+  if (!Number.isFinite(value)) return "n/a";
+  const rounded = Number(value.toFixed(digits));
+  return rounded.toLocaleString(undefined, { maximumFractionDigits: digits });
+}
+
+function formatSigned(value, digits = 3) {
+  if (!Number.isFinite(value)) return "n/a";
+  return formatNumber(value, digits);
+}
+
+function getShock() {
+  return {
+    type: dom.shockType.value,
+    sign: dom.shockSign.value,
+    scale: Number(dom.shockScale.value)
+  };
+}
+
+function getHorizon() {
+  const value = Math.round(Number(dom.horizon.value));
+  return Math.min(80, Math.max(12, Number.isFinite(value) ? value : 40));
+}
+
+function paramsFor(side) {
+  return side === "benchmark" ? benchmark : alternative;
+}
+
+function setParamsFor(side, value) {
+  if (side === "benchmark") benchmark = value;
+  else alternative = value;
+}
+
+function minimumXi(params) {
+  if (!Number.isFinite(params.n)) return 0.01;
+  return Math.min(0.999, Math.max(0.01, params.n + HOME_BIAS_MARGIN));
+}
+
+function enforceHomeBias(params) {
+  const minXi = minimumXi(params);
+  if (Number.isFinite(params.xi) && params.xi < minXi) params.xi = minXi;
+}
+
+function markDirty() {
+  dom.status.className = "status warning";
+  dom.status.textContent = "Settings changed. Click Plot responses to update the charts.";
+}
+
+function labelHtml(key, fallback) {
+  const labels = {
+    n: "Home country size, <span class=\"math-param\">n</span>",
+    foreignSize: "Foreign country size, <span class=\"math-param\">1 - n</span>",
+    xi: "Home-goods share in Home CPI, <span class=\"math-param\">&xi;</span>",
+    xistar: "Home-goods share in Foreign CPI, <span class=\"math-param\">&xi;<sup class=\"star-sup\">*</sup></span>",
+    beta: "Discount factor, <span class=\"math-param\">&beta;</span>",
+    gam: "Risk aversion, <span class=\"math-param\">&gamma;</span>",
+    vphi: "Inverse Frisch elasticity, <span class=\"math-param\">&varphi;</span>",
+    sig: "Trade elasticity, <span class=\"math-param\">&sigma;</span>",
+    alpha: "Calvo parameter, <span class=\"math-param\">&alpha;</span>",
+    rho_i: "Home interest-rate smoothing, <span class=\"math-param\">&rho;<sub>i</sub></span>",
+    rho_istar: "Foreign interest-rate smoothing, <span class=\"math-param\">&rho;<sub>i<sup>*</sup></sub></span>",
+    phi_pi: "Home inflation response, <span class=\"math-param\">&phi;<sub>&pi;</sub></span>",
+    phi_pistar: "Foreign inflation response, <span class=\"math-param\">&phi;<sub>&pi;<sup>*</sup></sub></span>",
+    phi_x: "Home slack response, <span class=\"math-param\">&phi;<sub>x</sub></span>",
+    phi_xstar: "Foreign slack response, <span class=\"math-param\">&phi;<sub>x<sup>*</sup></sub></span>",
+    iota: "Natural-rate tracking, <span class=\"math-param\">&iota;</span>",
+    deltaa: "Home productivity persistence, <span class=\"math-param\">&delta;<sub>a</sub></span>",
+    deltaastar: "Foreign productivity persistence, <span class=\"math-param\">&delta;<sub>a<sup>*</sup></sub></span>",
+    stda: "Home productivity std. dev., <span class=\"math-param\">&sigma;<sub>a</sub></span>",
+    stdastar: "Foreign productivity std. dev., <span class=\"math-param\">&sigma;<sub>a<sup>*</sup></sub></span>",
+    corraastar: "Productivity innovation correlation, <span class=\"math-param\">&rho;<sub>aa<sup>*</sup></sub></span>",
+    deltam: "Home monetary persistence, <span class=\"math-param\">&delta;<sub>m</sub></span>",
+    deltamstar: "Foreign monetary persistence, <span class=\"math-param\">&delta;<sub>m<sup>*</sup></sub></span>",
+    stdm: "Home monetary std. dev., <span class=\"math-param\">&sigma;<sub>m</sub></span>",
+    stdmstar: "Foreign monetary std. dev., <span class=\"math-param\">&sigma;<sub>m<sup>*</sup></sub></span>",
+    corrmmstar: "Monetary innovation correlation, <span class=\"math-param\">&rho;<sub>mm<sup>*</sup></sub></span>"
+  };
+  return labels[key] || fallback;
+}
+
+function plainLabel(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+}
+
+function syncParameterControls() {
+  dom.parameterControls.querySelectorAll("[data-param][data-side]").forEach(input => {
+    const side = input.dataset.side;
+    const key = input.dataset.param;
+    const params = paramsFor(side);
+    if (key === "xi") input.min = minimumXi(params);
+    if (key in params && Number.isFinite(params[key])) input.value = String(params[key]);
+  });
+}
+
+function updateParam(side, key, value) {
+  const params = paramsFor(side);
+  params[key] = Number(value);
+  enforceHomeBias(params);
+  setParamsFor(side, params);
+  syncParameterControls();
+  renderImpliedValues();
+  markDirty();
+}
+
+function renderEditor(key, label, min, max, step, side) {
+  const params = paramsFor(side);
+  const ariaLabel = plainLabel(labelHtml(key, label));
+  if (key === "iota") {
+    return `
+      <select data-side="${side}" data-param="${key}" aria-label="${ariaLabel}, ${side}">
+        <option value="0"${Number(params[key]) === 0 ? " selected" : ""}>Standard Taylor rule</option>
+        <option value="1"${Number(params[key]) === 1 ? " selected" : ""}>Wicksellian rule</option>
+      </select>
+    `;
+  }
+  const controlMin = key === "xi" ? minimumXi(params) : min;
+  const value = Number.isFinite(params[key]) ? params[key] : min;
+  return `
+    <div class="param-editor">
+      <input type="range" min="${controlMin}" max="${max}" step="${step}" value="${value}" data-side="${side}" data-param="${key}" aria-label="${ariaLabel}, ${side} slider">
+      <input type="number" min="${controlMin}" max="${max}" step="${step}" value="${value}" data-side="${side}" data-param="${key}" aria-label="${ariaLabel}, ${side} exact value">
+    </div>
+  `;
+}
+
+function impliedValue(key, side) {
+  const params = paramsFor(side);
+  if (key === "foreignSize") return 1 - params.n;
+  if (key === "xistar") return getXistar(params);
+  return NaN;
+}
+
+function renderReadOnlyValue(key, side) {
+  return `
+    <div class="readonly-value" data-implied="${key}" data-side="${side}">
+      ${formatNumber(impliedValue(key, side), 6)}
+    </div>
+  `;
+}
+
+function structuralRowsFor(params) {
+  const rows = [];
+  params.forEach(row => {
+    rows.push(row);
+    if (row[0] === "n") rows.push(["foreignSize", "", null, null, null, true]);
+    if (row[0] === "xi") rows.push(["xistar", "", null, null, null, true]);
+  });
+  return rows;
+}
+
+function rowsForGroup(group) {
+  return group.title === "Structural parameters" ? structuralRowsFor(group.params) : group.params;
+}
+
+function renderParameterControls() {
+  dom.parameterControls.innerHTML = PARAM_GROUPS.map(group => `
+    <details class="parameter-group" open>
+      <summary>${group.title}</summary>
+      <div class="group-body">
+        <p class="small">${group.help}</p>
+        <div class="param-grid header-row">
+          <span>Parameter</span>
+          <span>Benchmark</span>
+          <span>Alternative</span>
+        </div>
+        ${rowsForGroup(group).map(([key, label, min, max, step, readOnly]) => `
+          <div class="param-grid">
+            <label for="param-${key}-benchmark">${labelHtml(key, label)}</label>
+            ${readOnly ? renderReadOnlyValue(key, "benchmark") : renderEditor(key, label, min, max, step, "benchmark")}
+            ${readOnly ? renderReadOnlyValue(key, "alternative") : renderEditor(key, label, min, max, step, "alternative")}
+          </div>
+        `).join("")}
+      </div>
+    </details>
+  `).join("");
+
+  dom.parameterControls.querySelectorAll("[data-param][data-side]").forEach(input => {
+    input.addEventListener("input", event => {
+      updateParam(event.currentTarget.dataset.side, event.currentTarget.dataset.param, event.currentTarget.value);
+    });
+  });
+}
+
+function renderImpliedValues() {
+  enforceHomeBias(benchmark);
+  enforceHomeBias(alternative);
+  dom.parameterControls.querySelectorAll("[data-implied][data-side]").forEach(element => {
+    element.textContent = formatNumber(impliedValue(element.dataset.implied, element.dataset.side), 6);
+  });
+}
+
+function renderStatus(benchmarkValidation, alternativeValidation) {
+  const warnings = [
+    ...(benchmarkValidation.warnings || []).map(text => `Benchmark: ${text}`),
+    ...(alternativeValidation.warnings || []).map(text => `Alternative: ${text}`)
+  ];
+
+  dom.status.className = "status";
+  if (warnings.length) {
+    dom.status.classList.add("warning");
+    dom.status.textContent = warnings.join(" ");
+  } else {
+    dom.status.textContent = "Impulse responses plotted. The impact of the selected shock is recorded in quarter 1.";
+  }
+}
+
+function niceTicks(min, max, count = 5) {
+  if (Math.abs(max - min) < 1e-10) {
+    const bump = Math.max(1e-4, Math.abs(max) * 0.2);
+    min -= bump;
+    max += bump;
+  }
+  return Array.from({ length: count }, (_, i) => min + (i * (max - min)) / (count - 1));
+}
+
+function quarterTicks(horizon) {
+  const ticks = [1, Math.round(horizon / 4), Math.round(horizon / 2), Math.round((3 * horizon) / 4), horizon];
+  return Array.from(new Set(ticks.map(t => Math.min(horizon, Math.max(1, t)))));
+}\n
+function getSeriesValue(row, series, layer = "primary") {
+  if (layer === "secondary" && series.secondaryVariable) return row[series.secondaryVariable];
+  if (series.id === "growth") return row.growth;
+  if (series.id === "growthStar") return row.growthStar;
+  return row[series.variable];
+}
+
+function pathFor(rows, series, scaleX, scaleY, layer = "primary") {
+  return rows.map((row, index) => {
+    const command = index === 0 ? "M" : "L";
+    const quarter = row.period + 1;
+    return `${command}${scaleX(quarter).toFixed(2)},${scaleY(getSeriesValue(row, series, layer)).toFixed(2)}`;
+  }).join(" ");
+}
+
+function svgEscape(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function lineClass(series, side, layer = "primary") {
+  const layerClass = layer === "secondary" ? " secondary" : "";
+  if (series.group !== "shock") return `chart-line ${side}${layerClass}`;
+  const kind = series.shockKind === "productivity" ? "productivity" : "monetary";
+  return `chart-line shock-line ${kind} ${side}`;
+}
+
+function renderChart(series) {
+  const width = 760;
+  const height = 340;
+  const margin = { top: 30, right: 22, bottom: 58, left: 70 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const rowsB = latest.benchmark.rows;
+  const rowsA = latest.alternative.rows;
+  const allValues = [...rowsB, ...rowsA].flatMap(row => {
+    const values = [getSeriesValue(row, series)];
+    if (series.secondaryVariable) values.push(getSeriesValue(row, series, "secondary"));
+    return values;
+  }).filter(Number.isFinite);
+  let minY = Math.min(...allValues, 0);
+  let maxY = Math.max(...allValues, 0);
+  const pad = Math.max(1e-5, (maxY - minY) * 0.08);
+  minY -= pad;
+  maxY += pad;
+
+  const horizon = rowsB.length;
+  const scaleX = q => margin.left + ((q - 1) / Math.max(1, horizon - 1)) * plotWidth;
+  const scaleY = y => margin.top + (1 - (y - minY) / (maxY - minY)) * plotHeight;
+  const yTicks = niceTicks(minY, maxY, 5);
+  const xTicks = quarterTicks(horizon);
+  const zeroY = scaleY(0);
+
+  const yGrid = yTicks.map(tick => `
+    <text class="axis-label" x="${margin.left - 8}" y="${(scaleY(tick) + 4).toFixed(2)}" text-anchor="end">${svgEscape(formatSigned(tick, 2))}</text>
+  `).join("");
+  const xGrid = xTicks.map(tick => `
+    <text class="axis-label" x="${scaleX(tick).toFixed(2)}" y="${height - 28}" text-anchor="middle">${tick}</text>
+  `).join("");
+
+  return `
+    <svg class="chart" data-chart-id="${series.id}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${svgEscape(series.label)} impulse response">
+      <text class="axis-unit" x="${margin.left - 46}" y="${margin.top + plotHeight / 2}" text-anchor="middle" transform="rotate(-90 ${margin.left - 46} ${margin.top + plotHeight / 2})">%</text>
+      ${yGrid}
+      <line class="zero-line" x1="${margin.left}" x2="${width - margin.right}" y1="${zeroY.toFixed(2)}" y2="${zeroY.toFixed(2)}"></line>
+      <line class="axis" x1="${margin.left}" x2="${margin.left}" y1="${margin.top}" y2="${height - margin.bottom}"></line>
+      <line class="axis" x1="${margin.left}" x2="${width - margin.right}" y1="${height - margin.bottom}" y2="${height - margin.bottom}"></line>
+      ${xGrid}
+      <text class="axis-label" x="${margin.left + plotWidth / 2}" y="${height - 7}" text-anchor="middle">quarters</text>
+      ${series.secondaryVariable ? `<path class="${lineClass(series, "alternative", "secondary")}" d="${pathFor(rowsA, series, scaleX, scaleY, "secondary")}"></path>` : ""}
+      <path class="${lineClass(series, "alternative")}" d="${pathFor(rowsA, series, scaleX, scaleY)}"></path>
+      ${series.secondaryVariable ? `<path class="${lineClass(series, "benchmark", "secondary")}" d="${pathFor(rowsB, series, scaleX, scaleY, "secondary")}"></path>` : ""}
+      <path class="${lineClass(series, "benchmark")}" d="${pathFor(rowsB, series, scaleX, scaleY)}"></path>
+    </svg>
+  `;
+}
+
+function renderChartCard(series) {
+  return `
+    <article class="chart-card">
+      <div class="chart-head">
+        <div>
+          <h3>${series.label}</h3>
+          <p>${series.unit}${series.note ? ` | ${series.note}` : ""}</p>
+        </div>
+        <button class="svg-button" type="button" data-download-svg="${series.id}">SVG</button>
+      </div>
+      ${renderChart(series)}
+    </article>
+  `;
+}
+
+function renderCharts() {
+  dom.charts.innerHTML = CHART_GROUPS.map(([groupId, groupLabel]) => {
+    const groupSeries = SERIES.filter(series => series.group === groupId);
+    const seriesById = Object.fromEntries(groupSeries.map(series => [series.id, series]));
+    const rows = CHART_LAYOUTS[groupId] || [groupSeries.map(series => series.id)];
+    return `
+      <section class="chart-section ${groupId}">
+        <h2>${groupLabel}</h2>
+        <div class="chart-grid">
+          ${rows.map(row => `
+            <div class="chart-row ${row.length === 1 ? "single" : ""}">
+              ${row.map(seriesId => renderChartCard(seriesById[seriesId])).join("")}
+            </div>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }).join("");
+
+  dom.charts.querySelectorAll("[data-download-svg]").forEach(button => {
+    button.addEventListener("click", () => downloadChart(button.dataset.downloadSvg));
+  });
+}
+
+function downloadBlob(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(value) {
+  if (value == null) return "";
+  const text = String(value);
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+function buildCsv() {
+  if (!latest) return "";
+  const header = ["quarter"];
+  SERIES.forEach(series => {
+    header.push(`benchmark_${series.id}`, `alternative_${series.id}`);
+    if (series.secondaryVariable) header.push(`benchmark_${series.secondaryVariable}`, `alternative_${series.secondaryVariable}`);
+  });
+  const lines = [header.map(csvEscape).join(",")];
+  latest.benchmark.rows.forEach((rowB, idx) => {
+    const rowA = latest.alternative.rows[idx];
+    const line = [rowB.period + 1];
+    SERIES.forEach(series => {
+      line.push(getSeriesValue(rowB, series), getSeriesValue(rowA, series));
+      if (series.secondaryVariable) line.push(getSeriesValue(rowB, series, "secondary"), getSeriesValue(rowA, series, "secondary"));
+    });
+    lines.push(line.map(csvEscape).join(","));
+  });
+  return lines.join("\n");
+}
+
+function downloadChart(seriesId) {
+  const svg = dom.charts.querySelector(`svg[data-chart-id="${seriesId}"]`);
+  if (!svg) return;
+  const clone = svg.cloneNode(true);
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  const css = `
+    <style>
+      .axis{stroke:#111;stroke-width:2}.grid-line{display:none}
+      .axis-label,.axis-unit{fill:#111;font:700 15px Arial,Helvetica,sans-serif}
+      .axis-unit{font-size:16px}
+      .chart-line.benchmark{fill:none;stroke:#111;stroke-width:3.2}
+      .chart-line.alternative{fill:none;stroke:#1f6fb2;stroke-width:3.2}
+      .chart-line.secondary{stroke-dasharray:8 6}
+      .shock-line.productivity.benchmark{stroke:#8b2f2a}.shock-line.productivity.alternative{stroke:#c95d50}
+      .shock-line.monetary.benchmark{stroke:#7a3f18}.shock-line.monetary.alternative{stroke:#c46d2d}
+      .zero-line{stroke:#555;stroke-width:1.5;stroke-dasharray:3 3}
+    </style>
+  `;
+  clone.insertAdjacentHTML("afterbegin", css);
+  downloadBlob(`${seriesId}_irf.svg`, new XMLSerializer().serializeToString(clone), "image/svg+xml");
+}
+
+function run() {
+  try {
+    const horizon = getHorizon();
+    dom.horizon.value = String(horizon);
+    enforceHomeBias(benchmark);
+    enforceHomeBias(alternative);
+    syncParameterControls();
+    renderImpliedValues();
+
+    const shock = getShock();
+    const benchmarkValidation = validateParams(benchmark);
+    const alternativeValidation = validateParams(alternative);
+    if (!benchmarkValidation.ok) throw new Error(`Benchmark: ${benchmarkValidation.messages.join(" ")}`);
+    if (!alternativeValidation.ok) throw new Error(`Alternative: ${alternativeValidation.messages.join(" ")}`);
+
+    latest = {
+      benchmark: solveModel(benchmark, shock, horizon),
+      alternative: solveModel(alternative, shock, horizon)
+    };
+    renderStatus(benchmarkValidation, alternativeValidation);
+    renderCharts();
+  } catch (error) {
+    dom.status.className = "status error";
+    dom.status.textContent = error.message;
+  }
+}
+
+function wireEvents() {
+  [dom.shockType, dom.shockSign, dom.shockScale, dom.horizon].forEach(input => {
+    input.addEventListener("input", markDirty);
+  });
+
+  dom.plotButton.addEventListener("click", run);
+
+  dom.resetBoth.addEventListener("click", () => {
+    benchmark = cloneParams(PAPER_PARAMS);
+    alternative = cloneParams(PAPER_PARAMS);
+    renderParameterControls();
+    renderImpliedValues();
+    markDirty();
+  });
+
+  dom.copyBenchmark.addEventListener("click", () => {
+    alternative = cloneParams(benchmark);
+    renderParameterControls();
+    renderImpliedValues();
+    markDirty();
+  });
+
+  dom.downloadCsv.addEventListener("click", () => {
+    downloadBlob("global_slack_irfs.csv", buildCsv(), "text/csv");
+  });
+}
+
+renderParameterControls();
+renderImpliedValues();
+wireEvents();
+run();
