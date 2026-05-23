@@ -103,7 +103,8 @@ function labelHtml(key, fallback) {
     phi_pistar: "Foreign inflation response, <span class=\"math-param\">&phi;<sub>&pi;<sup>*</sup></sub></span>",
     phi_x: "Home slack response, <span class=\"math-param\">&phi;<sub>x</sub></span>",
     phi_xstar: "Foreign slack response, <span class=\"math-param\">&phi;<sub>x<sup>*</sup></sub></span>",
-    iota: "Natural-rate tracking, <span class=\"math-param\">&iota;</span>",
+    iota: "Home natural-rate tracking, <span class=\"math-param\">&iota;</span>",
+    iotastar: "Foreign natural-rate tracking, <span class=\"math-param\">&iota;<sup class=\"star-sup\">*</sup></span>",
     deltaa: "Home productivity persistence, <span class=\"math-param\">&delta;<sub>a</sub></span>",
     deltaastar: "Foreign productivity persistence, <span class=\"math-param\">&delta;<sub>a<sup>*</sup></sub></span>",
     stda: "Home productivity std. dev., <span class=\"math-param\">&sigma;<sub>a</sub></span>",
@@ -147,7 +148,7 @@ function updateParam(side, key, value) {
 function renderEditor(key, label, min, max, step, side) {
   const params = paramsFor(side);
   const ariaLabel = plainLabel(labelHtml(key, label));
-  if (key === "iota") {
+  if (key === "iota" || key === "iotastar") {
     return `
       <select data-side="${side}" data-param="${key}" aria-label="${ariaLabel}, ${side}">
         <option value="0"${Number(params[key]) === 0 ? " selected" : ""}>Standard Taylor rule</option>
@@ -379,6 +380,18 @@ function renderCharts() {
   });
 }
 
+function renderSolutionError(message) {
+  dom.charts.innerHTML = `
+    <section class="chart-section solution-error">
+      <h2>Solution Not Available</h2>
+      <div class="solution-error-panel">
+        <p>No impulse responses can be plotted for this specification.</p>
+        <p>${svgEscape(message)}</p>
+      </div>
+    </section>
+  `;
+}
+
 function downloadBlob(filename, content, type) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -430,8 +443,7 @@ function downloadChart(seriesId) {
       .chart-line.benchmark{fill:none;stroke:#111;stroke-width:3.2}
       .chart-line.alternative{fill:none;stroke:#1f6fb2;stroke-width:3.2}
       .chart-line.secondary{stroke-dasharray:8 6}
-      .shock-line.productivity.benchmark{stroke:#8b2f2a}.shock-line.productivity.alternative{stroke:#c95d50}
-      .shock-line.monetary.benchmark{stroke:#7a3f18}.shock-line.monetary.alternative{stroke:#c46d2d}
+      .shock-line.productivity.benchmark,.shock-line.productivity.alternative,.shock-line.monetary.benchmark,.shock-line.monetary.alternative{stroke:#8b2f2a}
       .zero-line{stroke:#555;stroke-width:1.5;stroke-dasharray:3 3}
     </style>
   `;
@@ -462,7 +474,9 @@ function run() {
     renderCharts();
   } catch (error) {
     dom.status.className = "status error";
-    dom.status.textContent = error.message;
+    dom.status.textContent = `Solution not available: ${error.message}`;
+    latest = null;
+    renderSolutionError(error.message);
   }
 }
 
