@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260523-math-labels">
+  <link rel="stylesheet" href="styles.css?v=20260523-policy-alerts">
 </head>
 <body>
   <main>
@@ -22,7 +22,9 @@
           workhorse two-country New Keynesian model when structural parameters, shock processes, and
           monetary-policy rules are modified. It is designed as a companion to
           <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a>
-          by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne. The black lines report a benchmark
+          by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne, and to
+          <a href="https://doi.org/10.1007/s10614-017-9746-9" target="_blank" rel="noreferrer"><em>Good Policies or Good Luck? New Insights on Globalization and the International Monetary Policy Transmission Mechanism</em></a>
+          by Enrique Mart&iacute;nez Garc&iacute;a. The black lines report a benchmark
           parameterization, while the blue lines report an alternative specification chosen by the
           user, making it possible to trace endogenous and exogenous cross-country spillovers as well
           as the role of monetary policy.
@@ -88,8 +90,7 @@
         <div class="legend-strip">
           <span><i class="line-key benchmark"></i> Benchmark</span>
           <span><i class="line-key alternative"></i> Alternative</span>
-          <span><i class="line-key productivity"></i> Productivity shock</span>
-          <span><i class="line-key monetary"></i> Monetary shock</span>
+          <span><i class="line-key shock"></i> Shocks</span>
         </div>
         <div id="charts" class="chart-stack"></div>
       </section>
@@ -100,8 +101,10 @@
       <p>
         This browser-based plotter accompanies
         <a href="https://www.dallasfed.org/-/media/documents/research/staff/staff1002.pdf" target="_blank" rel="noreferrer"><em>The Global Slack Hypothesis and the Open-Economy Phillips Curve</em></a>
-        by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne. The link is a placeholder for the
-        public version of the paper. The plotter solves a workhorse two-country New Keynesian
+        by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne, and
+        <a href="https://doi.org/10.1007/s10614-017-9746-9" target="_blank" rel="noreferrer"><em>Good Policies or Good Luck? New Insights on Globalization and the International Monetary Policy Transmission Mechanism</em></a>
+        by Enrique Mart&iacute;nez Garc&iacute;a. The Dallas Fed link is a placeholder for the
+        public version of the Global Slack paper. The plotter solves a workhorse two-country New Keynesian
         model in which Home and Foreign economies are linked through trade, relative prices, monetary
         policy, and cross-country shock transmission. The pricing assumption is producer-currency
         pricing, abbreviated PCP, meaning that exporters set prices in their own currency. In this
@@ -131,9 +134,9 @@
       <p>
         The policy-rate and natural-rate responses are plotted in separate panels. In the relative-price
         panels, solid lines report the terms of trade and dashed lines report the real exchange rate.
-        The Wicksellian monetary-policy option means that each policy rule tracks its own economy's
+        The Wicksellian monetary-policy option means that the selected policy rule tracks its own economy's
         natural rate; the standard Taylor-rule option responds to inflation and slack without that
-        natural-rate tracking term.
+        natural-rate tracking term. The Home and Foreign rules can be set independently.
       </p>
       <p>
         The plotted terms of trade, real exchange rates, and trade balances are accounting relationships
@@ -152,6 +155,6 @@
   <noscript>
     <p class="script-warning">This tool requires JavaScript to solve the model and plot impulse responses.</p>
   </noscript>
-  <script type="module" src="app.js?v=20260523-math-labels"></script>
+  <script type="module" src="app.js?v=20260523-policy-alerts"></script>
 </body>
 </html>
