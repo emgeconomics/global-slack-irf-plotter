@@ -258,7 +258,8 @@ function niceTicks(min, max, count = 5) {
 function quarterTicks(horizon) {
   const ticks = [1, Math.round(horizon / 4), Math.round(horizon / 2), Math.round((3 * horizon) / 4), horizon];
   return Array.from(new Set(ticks.map(t => Math.min(horizon, Math.max(1, t)))));
-}\n
+}
+
 function getSeriesValue(row, series, layer = "primary") {
   if (layer === "secondary" && series.secondaryVariable) return row[series.secondaryVariable];
   if (series.id === "growth") return row.growth;
