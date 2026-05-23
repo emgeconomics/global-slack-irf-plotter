@@ -335,6 +335,19 @@ button:hover {
   font-size: 0.7em;
 }
 
+.math-param > .star-sup,
+.math > .star-sup {
+  margin-left: 0.08em;
+}
+
+.math-param sub sup,
+.math sub sup {
+  font-size: 0.8em;
+  margin-left: 0.04em;
+  position: relative;
+  top: -0.15em;
+}
+
 .meta-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
