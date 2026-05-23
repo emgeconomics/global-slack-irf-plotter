@@ -104,58 +104,72 @@
         by Enrique Mart&iacute;nez Garc&iacute;a and Mark A. Wynne, and
         <a href="https://doi.org/10.1007/s10614-017-9746-9" target="_blank" rel="noreferrer"><em>Good Policies or Good Luck? New Insights on Globalization and the International Monetary Policy Transmission Mechanism</em></a>
         by Enrique Mart&iacute;nez Garc&iacute;a. The Dallas Fed link is a placeholder for the
-        public version of the Global Slack paper. The plotter solves a workhorse two-country New Keynesian
-        model in which Home and Foreign economies are linked through trade, relative prices, monetary
-        policy, and cross-country shock transmission. The pricing assumption is producer-currency
-        pricing, abbreviated PCP, meaning that exporters set prices in their own currency. In this
-        setting, nominal exchange-rate movements pass through fully to import prices.
+        public version of the Global Slack paper.
       </p>
       <p>
-        The foreign import-share parameter is pinned down by zero steady-state trade balance:
-        <span class="math">&xi;<sup class="star-sup">*</sup> = n(1 - &xi;)/(1 - n)</span>. The interface therefore lets
-        users choose <span class="math">n</span> and <span class="math">&xi;</span>, but not
-        <span class="math">&xi;<sup class="star-sup">*</sup></span>. The controls impose the economically natural
-        home-bias restriction <span class="math">&xi; &ge; n</span>.
+        The plotter solves a workhorse two-country New Keynesian model in which the Home and Foreign
+        economies are linked through trade, relative prices, monetary policy, and cross-country shock
+        transmission. The pricing assumption is producer-currency pricing (PCP): exporters set prices
+        in their own currency. Under PCP, nominal exchange-rate movements pass through fully to import
+        prices.
+      </p>
+      <p>
+        The Foreign import-share parameter is pinned down by zero steady-state trade balance:
+      </p>
+      <p class="math-display">
+        <span class="math">&xi;<sup class="star-sup">*</sup> = n(1 - &xi;)/(1 - n)</span>.
+      </p>
+      <p>
+        The interface therefore allows users to choose the Home country size,
+        <span class="math">n</span>, and the Home import-share parameter, <span class="math">&xi;</span>,
+        but not <span class="math">&xi;<sup class="star-sup">*</sup></span>. The controls impose the
+        economically natural home-bias restriction <span class="math">&xi; &ge; n</span>.
       </p>
       <p>
         Shock magnitudes are expressed in innovation standard deviations. In a Gaussian benchmark, one,
-        two, and three standard deviations correspond roughly to 68, 95, and 99.7 percent bands. The
-        impact response is plotted as quarter 1, and the default horizon reports 40 quarters.
-        Innovation correlations are retained as displayed parameters for consistency with the stochastic
-        model, but a deterministic one-shock impulse response is driven by the selected innovation only.
+        two, and three-standard-deviation innovations correspond approximately to 68, 95, and 99.7
+        percent probability bands. The impact response is plotted as quarter 1, and the default
+        simulation horizon is 40 quarters. Innovation correlations are retained as displayed parameters
+        for consistency with the underlying stochastic model, but a deterministic one-shock impulse
+        response is driven only by the selected innovation.
       </p>
       <p>
-        The model combines aggregate demand equations, Phillips curves for inflation, monetary-policy
+        The model combines aggregate-demand equations, Phillips curves for inflation, monetary-policy
         rules, natural-rate and potential-output relationships, and stochastic processes for productivity
         and monetary-policy disturbances in both economies. Home and Foreign employment are computed
-        from the log-linear production relationships, so <span class="math">l = y - a</span> and
-        <span class="math">l<sup>*</sup> = y<sup>*</sup> - a<sup>*</sup></span>.
+        from the log-linear production relationships:
+      </p>
+      <p class="math-display">
+        <span class="math">l = y - a, &nbsp;&nbsp; l<sup>*</sup> = y<sup>*</sup> - a<sup>*</sup></span>.
       </p>
       <p>
-        The policy-rate and natural-rate responses are plotted in separate panels. In the relative-price
-        panels, solid lines report the terms of trade and dashed lines report the real exchange rate.
-        The Wicksellian monetary-policy option means that the selected policy rule tracks its own economy's
-        natural rate; the standard Taylor-rule option responds to inflation and slack without that
-        natural-rate tracking term. The Home and Foreign rules can be set independently.
+        Policy-rate and natural-rate responses are shown in separate panels. In the relative-price
+        panels, solid lines report the terms of trade, while dashed lines report the real exchange rate.
+        The Wicksellian monetary-policy option means that the selected policy rule tracks its own
+        economy's natural rate. The standard Taylor-rule option instead responds to inflation and slack
+        without an explicit natural-rate tracking term. The Home and Foreign policy rules can be set
+        independently.
       </p>
       <p>
         The plotted terms of trade, real exchange rates, and trade balances are accounting relationships
         computed after solving the dynamic system. For each economy, the terms of trade are defined as
         the price of imports relative to the price of exports, with both prices expressed in units of
         that economy's own currency. Under this convention, an increase in the terms of trade means
-        that imports become more expensive relative to exports, so it represents a deterioration; a
-        decrease represents an improvement. In log-linear terms, the Foreign terms of trade move
-        one-for-one in the opposite direction from the Home terms of trade.
+        that imports have become more expensive relative to exports and therefore represents a
+        deterioration; a decrease represents an improvement. In log-linear terms, the Foreign terms of
+        trade move one-for-one in the opposite direction from the Home terms of trade.
       </p>
       <p>
-        The real exchange rate is also read from the perspective of the economy being plotted, after
+        The real exchange rate is also reported from the perspective of the economy being plotted, after
         expressing the relevant consumption baskets in a common currency. An increase in the Home real
         exchange rate corresponds to a real depreciation of the Home currency, while a decrease
         corresponds to a real appreciation. The Foreign real exchange rate is defined symmetrically, so
-        its log-linear movement is the negative of the Home real exchange rate. Because the model is
-        normalized around zero steady-state trade balance, the trade-balance series report deviations
-        from that steady-state benchmark: a positive Home value corresponds to an equal Foreign deficit,
-        and vice versa.
+        its log-linear movement is the negative of the Home real exchange rate.
+      </p>
+      <p>
+        Because the model is normalized around zero steady-state trade balance, the plotted trade-balance
+        series report deviations from that benchmark. A positive Home trade-balance response corresponds
+        to an equal Foreign deficit, and vice versa.
       </p>
     </section>
   </main>
