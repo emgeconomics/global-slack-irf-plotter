@@ -328,6 +328,15 @@ button:hover {
   font-size: 1.08em;
 }
 
+.math-display {
+  text-align: center;
+  margin: 8px 0 10px;
+}
+
+.notes .math-display {
+  font-size: 15px;
+}
+
 .math-param sub,
 .math-param sup,
 .math sub,
