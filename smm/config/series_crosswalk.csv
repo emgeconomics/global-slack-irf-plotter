@@ -1,0 +1,7 @@
+series_id,workbook_id,sheet,range,frequency,block,series_label,unit,raw_first,raw_last,transformation
+real_gdp_row,real_gdp,US Trade Weights,G8:K194,quarterly,"Index, 2005 = 100","World (ex. U.S.)",index,1980Q2,2026Q1,"100*log(level_t/level_t-1)"
+real_gdp_us,real_gdp,US Trade Weights,G8:K194,quarterly,"Index, 2005 = 100",US,index,1980Q2,2026Q2,"100*log(level_t/level_t-1)"
+headline_cpi_row,headline_cpi,US Trade Weights,G8:K566,monthly,"Index, 2005 = 100","World (ex. U.S.)",index,1980-02,2026-06,"quarterly average of three monthly indexes; then 100*log(index_q/index_q-1)"
+headline_cpi_us,headline_cpi,US Trade Weights,G8:K566,monthly,"Index, 2005 = 100",US,index,1980-02,2026-06,"quarterly average of three monthly indexes; then 100*log(index_q/index_q-1)"
+policy_rate_row,policy_rate,US Trade Weights,A8:E567,monthly,Percent,"World (ex. U.S.)",percent per annum,1980-01,2026-07,"quarterly average of three monthly rates; divide by 4 for internal quarterly units"
+policy_rate_us,policy_rate,US Trade Weights,A8:E567,monthly,Percent,US,percent per annum,1980-01,2026-07,"quarterly average of three monthly rates; divide by 4 for internal quarterly units"
