@@ -1,3 +1,8 @@
 {
-  "type": "module"
+  "name": "global-slack-irf-plotter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
 }
