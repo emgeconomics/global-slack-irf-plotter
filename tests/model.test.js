@@ -5,6 +5,11 @@ import {
   alphaFromClosedEconomySlope,
   cloneParams,
   getClosedEconomySlope,
+  generateStandardizedInnovations,
+  checkImpulseResponseConvergence,
+  simulateModel,
+  computeMomentVector,
+  MOMENT_IDS,
   solveModel,
   validateParams
 } from "../model.js";
@@ -106,4 +111,87 @@ test("zero innovation standard deviation gives an exactly zero response", () => 
       if (key !== "period") assert.ok(Math.abs(value) < 1e-12, `${key} was not zero: ${value}`);
     }
   }
+});
+
+test("standardized innovation draws are exactly reproducible under a fixed seed", () => {
+  const first = generateStandardizedInnovations(PAPER_PARAMS, 500, 12345);
+  const second = generateStandardizedInnovations(PAPER_PARAMS, 500, 12345);
+  for (const type of SHOCKS) {
+    assert.deepEqual(Array.from(first[type]), Array.from(second[type]));
+  }
+});
+
+test("innovation generators reproduce configured cross-country correlations", () => {
+  const params = cloneParams(PAPER_PARAMS);
+  params.corraastar = 0.35;
+  params.corrmmstar = -0.25;
+  params.corrmumustar = 0.55;
+  params.corrddstar = 0.15;
+  const innovations = generateStandardizedInnovations(params, 200000, 24680);
+  const sampleCorrelation = (left, right) => {
+    let sumL = 0;
+    let sumR = 0;
+    for (let i = 0; i < left.length; i++) {
+      sumL += left[i];
+      sumR += right[i];
+    }
+    const meanL = sumL / left.length;
+    const meanR = sumR / right.length;
+    let numerator = 0;
+    let sumsqL = 0;
+    let sumsqR = 0;
+    for (let i = 0; i < left.length; i++) {
+      const dl = left[i] - meanL;
+      const dr = right[i] - meanR;
+      numerator += dl * dr;
+      sumsqL += dl * dl;
+      sumsqR += dr * dr;
+    }
+    return numerator / Math.sqrt(sumsqL * sumsqR);
+  };
+  const pairs = [
+    ["eps_a", "eps_astar", params.corraastar],
+    ["eps_m", "eps_mstar", params.corrmmstar],
+    ["eps_mu", "eps_mustar", params.corrmumustar],
+    ["eps_d", "eps_dstar", params.corrddstar]
+  ];
+  for (const [home, foreign, target] of pairs) {
+    const actual = sampleCorrelation(innovations[home], innovations[foreign]);
+    assert.ok(Math.abs(actual - target) < 0.01, `${home}/${foreign}: ${actual} versus ${target}`);
+  }
+});
+
+test("finite-horizon IRFs converge over the moment-relevant window", () => {
+  const result = checkImpulseResponseConvergence(PAPER_PARAMS, {
+    shortHorizon: 160,
+    longHorizon: 240,
+    checkPeriods: 40,
+    tolerance: 1e-7
+  });
+  assert.equal(result.ok, true, JSON.stringify(result));
+});
+
+test("stochastic simulation is finite, reproducible, and returns the requested sample length", () => {
+  const options = { periods: 120, burnIn: 120, responseHorizon: 120, seed: 98765 };
+  const first = simulateModel(PAPER_PARAMS, options);
+  const second = simulateModel(PAPER_PARAMS, options);
+  assert.equal(first.rows.length, options.periods);
+  assert.deepEqual(first.rows, second.rows);
+  for (const row of first.rows) {
+    for (const value of Object.values(row)) assert.ok(Number.isFinite(value));
+  }
+});
+
+test("the SMM moment function returns the frozen 27-moment vector", () => {
+  const simulation = simulateModel(PAPER_PARAMS, {
+    periods: 183,
+    burnIn: 150,
+    responseHorizon: 120,
+    seed: 314159
+  });
+  const moments = computeMomentVector(simulation.rows);
+  assert.equal(moments.values.length, 27);
+  assert.deepEqual(moments.ids, MOMENT_IDS);
+  assert.equal(moments.observations, 183);
+  for (const value of moments.values) assert.ok(Number.isFinite(value));
 });
