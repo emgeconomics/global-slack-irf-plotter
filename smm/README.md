@@ -7,17 +7,23 @@ This directory contains the reproducible quantitative discipline for the LACB ro
 Implemented:
 
 - official DGEI source registry in `config/sources.csv`;
+- audited exact series crosswalk in `config/series_crosswalk.csv`;
 - reproducible downloader and SHA-256 manifest in `R/download_dgei.R`;
-- full design in `../docs/SMM_DESIGN.md`.
+- quarterly six-observable panel builder in `R/build_quarterly_panel.R`;
+- August 2026 schema/coverage audit in `../docs/DGEI_DATA_AUDIT.md`;
+- full SMM design in `../docs/SMM_DESIGN.md`;
+- executable eight-shock IRF model and automated tests in the repository root.
+
+The audited common transformed sample is **1980Q3–2026Q1** with **183 quarterly observations**. The preferred pre-GFC benchmark is **1984Q1–2007Q4** with **96 observations**.
 
 Pending:
 
-- workbook schema audit and exact series crosswalk;
-- quarterly panel builder;
-- expanded stochastic model;
+- local execution of the R pipeline and comparison with the independently generated audit panel;
+- stochastic state-space simulator;
 - moment functions, objective, optimization, and diagnostics;
 - pre-GFC and full-sample configuration files;
-- Monte Carlo and publication outputs.
+- SMM estimates and variance decompositions;
+- revised Monte Carlo and publication outputs.
 
 ## Download source data
 
@@ -33,7 +39,22 @@ To replace existing raw workbooks with the current website versions:
 Rscript smm/R/download_dgei.R --force
 ```
 
-The script requires the R package `digest` to compute SHA-256 checksums. Raw workbooks are written to `smm/data/raw/` and are ignored by Git. The version-controlled manifest is written to `smm/data/manifests/dgei_download_manifest.csv`.
+The downloader requires the R package `digest` to compute SHA-256 checksums. Raw workbooks are written to `smm/data/raw/` and are ignored by Git. The version-controlled manifest is written to `smm/data/manifests/dgei_download_manifest.csv`.
+
+## Build the quarterly panel
+
+```powershell
+Rscript smm/R/build_quarterly_panel.R
+```
+
+The builder requires `readxl`. It validates the workbook headers and August 2026 coverage, then writes:
+
+```text
+smm/data/processed/dgei_us_row_quarterly.csv
+smm/data/manifests/dgei_panel_coverage.csv
+```
+
+Internal SMM units are quarterly log-percentage growth/inflation and quarterly policy rates. Annualized counterparts are presentation objects, not the quantities passed to the objective function.
 
 ## Reproducibility rule
 
