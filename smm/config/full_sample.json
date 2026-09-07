@@ -1,0 +1,36 @@
+{
+  "config_version": 1,
+  "name": "full_sample",
+  "sample": {
+    "start": "1980Q3",
+    "end": "2026Q1",
+    "exclude": []
+  },
+  "observables": {
+    "g_y_us": "g_y_us",
+    "g_y_row": "g_y_row",
+    "pi_us": "pi_us",
+    "pi_row": "pi_row",
+    "i_us": "i_us",
+    "i_row": "i_row_advanced"
+  },
+  "foreign_policy_proxy": {
+    "series": "Advanced (ex. U.S.)",
+    "status": "recommended_pending_author_approval",
+    "audit_document": "docs/POLICY_RATE_MEASUREMENT.md"
+  },
+  "interpretation": "Stress test: the linear Taylor-rule model omits the effective lower bound, pandemic nonlinearities, and time-varying shock volatility.",
+  "moments": "model/moments.js::MOMENT_IDS",
+  "simulation": {
+    "samples": 200,
+    "final_samples": 1000,
+    "burn_in_quarters": 500,
+    "response_horizon_quarters": 240,
+    "seed": 20260812,
+    "common_random_numbers": true
+  },
+  "weighting": {
+    "stage_1": "inverse_squared_block_bootstrap_standard_errors",
+    "stage_2": "regularized_inverse_block_bootstrap_covariance"
+  }
+}

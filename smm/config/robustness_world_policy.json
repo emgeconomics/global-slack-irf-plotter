@@ -1,0 +1,32 @@
+{
+  "config_version": 1,
+  "name": "robustness_world_policy",
+  "sample": {
+    "start": "1984Q1",
+    "end": "2007Q4",
+    "exclude": []
+  },
+  "observables": {
+    "g_y_us": "g_y_us",
+    "g_y_row": "g_y_row",
+    "pi_us": "pi_us",
+    "pi_row": "pi_row",
+    "i_us": "i_us",
+    "i_row": "i_row_world"
+  },
+  "foreign_policy_proxy": {
+    "series": "World (ex. U.S.)",
+    "status": "audit_robustness_only",
+    "audit_document": "docs/POLICY_RATE_MEASUREMENT.md"
+  },
+  "interpretation": "Deliberately exposes the mismatch between a single stationary Foreign Taylor-rule instrument and the extreme nominal regimes contained in the broad world aggregate.",
+  "moments": "model/moments.js::MOMENT_IDS",
+  "simulation": {
+    "samples": 200,
+    "final_samples": 1000,
+    "burn_in_quarters": 500,
+    "response_horizon_quarters": 240,
+    "seed": 20260813,
+    "common_random_numbers": true
+  }
+}

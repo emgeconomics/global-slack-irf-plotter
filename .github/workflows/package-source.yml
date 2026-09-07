@@ -1,0 +1,28 @@
+name: Package revision source
+
+on:
+  push:
+    branches:
+      - codex/lajcb-r2-smm
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out revision branch
+        uses: actions/checkout@v4
+
+      - name: Upload reproducible source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-slack-irf-plotter_R1
+          path: |
+            .
+            !.git/**
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: true

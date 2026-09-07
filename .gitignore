@@ -1,0 +1,45 @@
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+~$*
+*.swp
+*.swo
+*.tmp
+*.bak
+*.autosave
+
+# Logs and caches
+*.log
+.cache/
+__pycache__/
+*.py[cod]
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+node_modules/
+
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Downloaded DGEI source workbooks are reproduced by code.
+smm/data/raw/*
+!smm/data/raw/.gitkeep
+
+# Local estimation caches and noncanonical runs.
+smm/cache/
+smm/output/*
+!smm/output/README.md
+
+# Large or temporary legacy files. Reviewed source/reference files may be
+# force-added only after they appear in legacy_import/import_manifest.csv.
+legacy_import/**/*.zip
+legacy_import/**/*.7z
+legacy_import/**/*.tar
+legacy_import/**/*.gz
+legacy_import/**/*.tmp
+legacy_import/**/*.log

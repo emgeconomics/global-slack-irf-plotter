@@ -1,0 +1,4 @@
+id,frequency,url,filename
+real_gdp,quarterly,https://www.dallasfed.org/-/media/Documents/research/international/dgei/gdp.xlsx,dgei_gdp.xlsx
+headline_cpi,monthly,https://www.dallasfed.org/-/media/Documents/research/international/dgei/cpi.xlsx,dgei_cpi.xlsx
+policy_rate,monthly,https://www.dallasfed.org/-/media/documents/research/international/dgei/policy.xlsx,dgei_policy.xlsx
