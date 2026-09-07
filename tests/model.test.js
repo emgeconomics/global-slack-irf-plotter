@@ -63,11 +63,18 @@ test("positive markup shocks raise the corresponding producer-origin CPI pressur
   assert.ok(foreign.rows[0].pistar > 0, `Foreign inflation impact was ${foreign.rows[0].pistar}`);
 });
 
-test("positive aggregate-demand shocks raise the corresponding output gap on impact", () => {
+test("positive Euler/aggregate-demand wedges raise the corresponding output gap on impact", () => {
   const home = solveModel(PAPER_PARAMS, { type: "eps_d", sign: "positive", scale: 1 }, 40);
   const foreign = solveModel(PAPER_PARAMS, { type: "eps_dstar", sign: "positive", scale: 1 }, 40);
   assert.ok(home.rows[0].x > 0, `Home output-gap impact was ${home.rows[0].x}`);
   assert.ok(foreign.rows[0].xstar > 0, `Foreign output-gap impact was ${foreign.rows[0].xstar}`);
+});
+
+test("Euler wedges propagate through both rows of the open-economy IS mapping", () => {
+  const home = solveModel(PAPER_PARAMS, { type: "eps_d", sign: "positive", scale: 1 }, 40);
+  const foreign = solveModel(PAPER_PARAMS, { type: "eps_dstar", sign: "positive", scale: 1 }, 40);
+  assert.ok(Math.abs(home.rows[0].xstar) > 1e-10, "Home Euler wedge did not affect Foreign slack.");
+  assert.ok(Math.abs(foreign.rows[0].x) > 1e-10, "Foreign Euler wedge did not affect Home slack.");
 });
 
 test("shock states obey their configured AR(1) laws", () => {
