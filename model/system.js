@@ -13,7 +13,10 @@ function buildBlocks(p, c) {
   const iota = Number(p.iota || 0);
   const iotastar = Number(p.iotastar || 0);
 
-  // Home IS curve, with d_t in output-gap units.
+  // Home IS curve. Code states d and dstar map to the manuscript Euler
+  // wedges zeta_t and zeta*_t, measured in real-rate-equivalent units.
+  // They enter by shifting the Home and Foreign real-rate gaps before the
+  // open-economy Lambda_x mapping is applied.
   add(U, 0, "x", p.gam);
   add(C, 0, "x", -p.gam);
   add(C, 0, "i", -c.LambdaXi);
@@ -22,7 +25,8 @@ function buildBlocks(p, c) {
   add(C, 0, "istar", c.LambdaXistar);
   add(C, 0, "instar", -c.LambdaXistar);
   add(U, 0, "pistar", -c.LambdaXistar);
-  add(C, 0, "d", p.gam);
+  add(C, 0, "d", c.LambdaXi);
+  add(C, 0, "dstar", -c.LambdaXistar);
 
   // Home CPI Phillips curve. Markup wedges are producer-origin shocks.
   add(C, 1, "pi", 1);
@@ -45,7 +49,8 @@ function buildBlocks(p, c) {
   add(C, 3, "a", -c.NaturalIa);
   add(C, 3, "astar", -c.NaturalIastar);
 
-  // Foreign IS curve.
+  // Foreign IS curve, with the same two Euler wedges passed through the
+  // Foreign row of the open-economy Lambda_x mapping.
   add(U, 4, "xstar", p.gam);
   add(C, 4, "xstar", -p.gam);
   add(C, 4, "i", c.LambdaXstarI);
@@ -54,7 +59,8 @@ function buildBlocks(p, c) {
   add(C, 4, "istar", -c.LambdaXstarIstar);
   add(C, 4, "instar", c.LambdaXstarIstar);
   add(U, 4, "pistar", c.LambdaXstarIstar);
-  add(C, 4, "dstar", p.gam);
+  add(C, 4, "d", -c.LambdaXstarI);
+  add(C, 4, "dstar", c.LambdaXstarIstar);
 
   // Foreign CPI Phillips curve.
   add(C, 5, "pistar", 1);
