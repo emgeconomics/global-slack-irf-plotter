@@ -43,19 +43,19 @@ export const PARAM_GROUPS = [
     ]
   },
   {
-    title: "Markup and aggregate-demand shocks",
-    help: "Provisional extension parameters pending the DGEI-based SMM exercise.",
+    title: "Markup and Euler/aggregate-demand wedges",
+    help: "Provisional extension parameters pending the DGEI-based SMM exercise. Demand-wedge innovations are measured in real-rate-equivalent model units.",
     params: [
       ["deltamu", "Home markup persistence", 0, 0.999, 0.001],
       ["deltamustar", "Foreign markup persistence", 0, 0.999, 0.001],
       ["stdmu", "Home markup std. dev.", 0, 5, 0.001],
       ["stdmustar", "Foreign markup std. dev.", 0, 5, 0.001],
       ["corrmumustar", "Markup innovation correlation", -0.99, 0.99, 0.01],
-      ["deltad", "Home demand persistence", 0, 0.999, 0.001],
-      ["deltadstar", "Foreign demand persistence", 0, 0.999, 0.001],
-      ["stdd", "Home demand std. dev.", 0, 5, 0.001],
-      ["stddstar", "Foreign demand std. dev.", 0, 5, 0.001],
-      ["corrddstar", "Demand innovation correlation", -0.99, 0.99, 0.01]
+      ["deltad", "Home Euler-wedge persistence", 0, 0.999, 0.001],
+      ["deltadstar", "Foreign Euler-wedge persistence", 0, 0.999, 0.001],
+      ["stdd", "Home Euler-wedge std. dev.", 0, 5, 0.001],
+      ["stddstar", "Foreign Euler-wedge std. dev.", 0, 5, 0.001],
+      ["corrddstar", "Euler-wedge innovation correlation", -0.99, 0.99, 0.01]
     ]
   }
 ];
@@ -83,6 +83,6 @@ export const SERIES = [
   { id: "mstar", group: "shock", label: "Foreign monetary shock process", variable: "mstar", transform: "level", unit: "percent", shockKind: "monetary" },
   { id: "mu", group: "shock", label: "Home markup shock process", variable: "mu", transform: "level", unit: "cost-pressure wedge", shockKind: "markup" },
   { id: "mustar", group: "shock", label: "Foreign markup shock process", variable: "mustar", transform: "level", unit: "cost-pressure wedge", shockKind: "markup" },
-  { id: "d", group: "shock", label: "Home aggregate-demand shock process", variable: "d", transform: "level", unit: "output-gap units", shockKind: "demand" },
-  { id: "dstar", group: "shock", label: "Foreign aggregate-demand shock process", variable: "dstar", transform: "level", unit: "output-gap units", shockKind: "demand" }
+  { id: "d", group: "shock", label: "Home Euler/aggregate-demand wedge", variable: "d", transform: "level", unit: "real-rate-equivalent model units", shockKind: "demand" },
+  { id: "dstar", group: "shock", label: "Foreign Euler/aggregate-demand wedge", variable: "dstar", transform: "level", unit: "real-rate-equivalent model units", shockKind: "demand" }
 ];
