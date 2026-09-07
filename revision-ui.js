@@ -3,15 +3,15 @@ import { PAPER_PARAMS, cloneParams, solveModel } from "./model.js";
 const ADDED_SHOCKS = [
   ["eps_mu", "Home markup"],
   ["eps_mustar", "Foreign markup"],
-  ["eps_d", "Home aggregate demand"],
-  ["eps_dstar", "Foreign aggregate demand"]
+  ["eps_d", "Home Euler/aggregate-demand wedge"],
+  ["eps_dstar", "Foreign Euler/aggregate-demand wedge"]
 ];
 
 const PROCESS_SERIES = [
   ["mu", "Home markup wedge"],
   ["mustar", "Foreign markup wedge"],
-  ["d", "Home demand wedge"],
-  ["dstar", "Foreign demand wedge"]
+  ["d", "Home Euler wedge"],
+  ["dstar", "Foreign Euler wedge"]
 ];
 
 function addShockOptions() {
@@ -132,7 +132,7 @@ function renderAddedShockProcesses() {
     section.className = "r2-process-section";
     section.innerHTML = `
       <h3>Added shock processes</h3>
-      <p class="small">These panels report the new markup and aggregate-demand state variables. Black is the benchmark; blue is the alternative parameterization.</p>
+      <p class="small">These panels report the new markup and Euler/aggregate-demand state variables. Black is the benchmark; blue is the alternative parameterization.</p>
       <div class="r2-process-grid">
         ${PROCESS_SERIES.map(([key, title]) => processChart(key, title, benchmark.rows, alternative.rows)).join("")}
       </div>`;
